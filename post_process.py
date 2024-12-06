@@ -8,7 +8,7 @@ Utilise les résultats de auto_cfd.py
 import matplotlib as plt
 import numpy as np
 import h5py # gère les fichiers h5
-from auto_cfd import * # importer les fonctions de auto_cfd.py
+# from auto_cfd import # importer les fonctions de auto_cfd.py
 
 
 

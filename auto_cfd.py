@@ -28,7 +28,7 @@ CORDE = 0 # en m (pour le calcul de Re)
 
 
 # Fonctions :
-def modif_stl(angle):
+def modif_stl(a):
     '''
     modif_stl(int) -> None
     Modifie le fichier stl de l'avion (complet)
@@ -38,27 +38,27 @@ def modif_stl(angle):
 
     # Ouvre le fichier avec seulement l'aile
     aile_mesh = mesh.Mesh.from_file('input.stl')
-    angle = np.radians(angle)
+    a = np.radians(a)
     # Crée une matrice pour tourner l'aile
-    rotation_matrix = np.array([np.cos(angle), -np.sin(angle), 0])
+    rotation_matrix = np.array([np.cos(a), -np.sin(a), 0])
     # Crée une matrice pour faire la translation
     translation_matrix = np.array([0,0,0])                              # VALEUR A MODIFIER !!!!!
     # Tourne l'aile de {angle} rad
     aile_mesh.rotate_using_matrix(rotation_matrix)
     # Monte l'aile pour la positionner p/r à l'avion
     aile_mesh.translate_using_matrix(translation_matrix)
-    aile_mesh.save(f'aile_{angle}.stl')
+    aile_mesh.save(f'aile_{a}.stl')
 
     # Reconstruit en fichier stl avec l'avion et l'aile
     avion_mesh = mesh.Mesh.from_file('body.stl') # fichier avec seulement l'avion
     mesh_data = np.concatenate([avion_mesh.data, aile_mesh.data])
     combined_mesh = mesh.Mesh(mesh_data)
     # Sauvegarder le fichier
-    combined_mesh.save(f'ad1_{angle}.stl')
+    combined_mesh.save(f'ad1_{a}.stl')
 
 
 
-def changer_parametres(vitesse,angle,filename):
+def changer_parametres(v,a,f):
     '''
     changer_parametres(int,int,str) -> None
     Change le fichier contenant les paramètres de la simulation
@@ -68,7 +68,7 @@ def changer_parametres(vitesse,angle,filename):
     '''
 
     ## Creation d'un nouveau fichier stl
-    modif_stl(angle)
+    modif_stl(a)
 
     ## Ouvre le fichier des parametres pour lire les données
     with open('template.txt','r') as para:
@@ -76,27 +76,27 @@ def changer_parametres(vitesse,angle,filename):
         # Dans les paramètres de simulation :
         # Modifie la vitesse
         # Modifie l'angle de l'aile
-        
+
 
     ## Créer un nouveau fichier
-    with open(filename,'w') as file:
+    with open(f,'w') as file:
         file.write(data)
 
 
-def lancer_simulation(filename,output_name): 
+def lancer_simulation(f,out_f): 
     '''
     lancer_simulation(str) -> None Lance la simulation de FluidX3D
     '''
     # -i specific input file
     # -o output directory
-    os.sytem(f'fluidx3d -i {filename} -o /results/{output_name}')
+    os.system(f'fluidx3d -i {f} -o /results/{out_f}')
 
 
 
 # On lance les simulations pour chaque vitesse et angle
-for v in vitesse:
-    for a in angle:
-        filename = f'input_speed{v}_angle{a}.txt'
-        output_name = f'results_speed{v}_angle{a}.h5'
-        changer_fichier(v,a,filename)
+for vit in vitesse:
+    for ang in angle:
+        filename = f'input_speed{vit}_angle{ang}.txt'
+        output_name = f'results_speed{vit}_angle{ang}.h5'
+        changer_parametres(vit,ang,filename)
         lancer_simulation(filename)
