@@ -26,7 +26,7 @@ def traitement(filename):
     # Calcul des forces
     force_trainee = np.sum(force_x)
     force_poussee = np.sum(force_y)
-    
+
     return np.mean(force_trainee),np.mean(force_poussee)
 
 
@@ -47,11 +47,12 @@ def angle_optimal(v_fixe):
     angle_optimal(list) -> int
     Cherche l'angle optimal pour une vitesse donnée
     '''
-    
+
     # Recherche de c_t minimal
     min_c = v_fixe[0][1]
+    a = v_fixe[0][0]
     for el in v_fixe:
-        if el[1] < v_fixe:
+        if el[1] < min_c:
             min_c = el[1]
             a = el[0]
     return a
