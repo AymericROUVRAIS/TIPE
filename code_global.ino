@@ -7,7 +7,7 @@
   - Mesure vitesse
 
   - Ecrire sur Carte SD les données la trame :
-    angle, (Um,) I, vitesse
+    angle, vitesse1, vitesse2, puissance
 
   PIN LAYOUT cf Fritzing
   Les LEDs servent seulement a voir si un problème
@@ -120,7 +120,14 @@ String lireDerniereLigne(){
 }
 
 float vitesseGPS(){
+  /* On prend 2 vitesse de l'avion:
+     - Une donné par le module gps
+     - Une calculé à la main
+     Pour avoir une vitesse plus précise
+  */
+  
   if (gps.encode(gpsSerial.read() )){
+    // v1 directement donné par le gps
     if (gps.location.isValid()){
       // Serial.println(gps.speed.kmph());
       v1 = gps.speed.kmph(); // vitesse en km/h
@@ -129,6 +136,7 @@ float vitesseGPS(){
     //  Serial.println("error with gps data");
     // }
 
+    // Calcul de v2 :
     t1 += gps.time.hour()*3600;
     t1 += gps.time.minute()*60;
     t1 += gps.time.second();
@@ -151,10 +159,13 @@ File dataToSD(){
   if (logFile) {
     // Serial.print("Writing to log.txt...");
     logFile.print(a); // Ecriture du fichier
-    logFile.print(", ");
-    logFile.print(v);
-    logFile.print(", ");
+      logFile.print(", ");
+    logFile.print(v1);
+      logFile.print(", ");
+    logFile.println(v2);
+      logFile.print(", ");
     logFile.println(i);
+
     
     logFile.close();
     // Serial.println("done.");
@@ -192,6 +203,10 @@ void loop() {
   u = analogRead(A0);
   // conversion en intensité du courant capté
   i = 0.39*(u-512);
+
+  // le moteur est commandé en intensité
+  // Umot est constant et vaut 14.8V pour batterie 4s
+  i = 14.8*i;
 
   // Serial.print("I : ");
   // Serial.println(i);
