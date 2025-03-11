@@ -5,7 +5,7 @@
   - Mesure vitesse
 
   - Ecrire sur Carte SD les données la trame :
-    angle, (Um,) I, vitesse
+    angle, vitesse1, vitesse2, puissance moteur
 
   PIN LAYOUT cf Fritzing
   Les LEDs servent seulement a voir si un problème
@@ -116,12 +116,21 @@ String lireDerniereLigne(){
 }
 
 float vitesseGPS(){
-  // Fonction qui récupère la vitesse dy GPS
+  /* Fonction qui récupère la vitesse du GPS
+     Prend 2 vitesse de l'avion:
+     - Une donné par le module GPS
+     - Une calculé à la main
+     Pour avoir une vitesse plus précise
+  */
+  
+
   if (gps.encode(gpsSerial.read() )){
     if (gps.location.isValid()){
+    // On récupère v1 :
       v1 = gps.speed.kmph(); // vitesse en km/h
     }
   
+    // On calcul v2 :
     t1 += gps.time.hour()*3600;
     t1 += gps.time.minute()*60;
     t1 += gps.time.second();
@@ -145,11 +154,11 @@ File dataToSD(){
   if (logFile) {
     // Ecriture du fichier
     logFile.print(a);
-    logFile.print(", ");
+      logFile.print(", ");
     logFile.print(v1);
-    logFile.print(", ");
+      logFile.print(", ");
     logFile.print(v2);
-    logFile.print(", ");
+      logFile.print(", ");
     logFile.println(i);
     // Fermeture du fichier
     logFile.close();
@@ -172,7 +181,8 @@ void loop() {
   i = 0.39*(u-512);
   // Conversion en puissance électrique
   // Le moteur est commandé seulement en intensité
-  i = 12*i;
+  // U = 14.8V pour du 4s
+  i = 14.8*i;
 
   // Lecture de l'angle de l'aile
   a = analogRead(A1);
