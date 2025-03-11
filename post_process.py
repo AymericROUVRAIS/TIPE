@@ -19,7 +19,7 @@
 
 # Importation des modules
 import numpy as np
-import matplotlib as plt
+import matplotlib.pyplot as plt
 from collections import defaultdict as dd
 
 
