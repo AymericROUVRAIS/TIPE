@@ -27,10 +27,11 @@ from collections import defaultdict as dd
 # Définitions des fonctions
 def traitement(i):
     '''
-    traitement(int) -> dict(int : list)
+    traitement(int) -> dict(int : list), list
     Prend le fichier log{i}.txt
     Renvoi un dictionnaire sous la forme : 
-        {angle1 : [(vitesse1,vitesse2,Puissance), ...]}
+        {angle1 : [(vitesse1,vitesse2,Puissance), ...]} 
+        et [ecart1,ecart2,...]
     '''
 
 
@@ -107,15 +108,18 @@ def cherche_angle(d):
 # Creation d'un default dict
 # sert à fusionner des dictionnaires facilement
 angle = dd(list)
+ecart_global = []
 
 # Iteration sur tout les fichiers logs
 for i in range(2):
     angle_i,ecart = traitement(i)
     
+    ecart_global += ecart
     # On fusionne angle_i avec angle
     for key,value in d.items():
         angle[key].append(value)
 
+print(f'Ecart de vitesse : min {min(ecart)} km/h, max {max(ecart)} km/h')
 
 v = cherche_angle(angle)
 
