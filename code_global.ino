@@ -8,6 +8,7 @@
 
   - Ecrire sur Carte SD les données la trame :
     angle, vitesse1, vitesse2, puissance moteur
+    en deg, en m/s,            en W
 
   PIN LAYOUT cf Fritzing
   Les LEDs servent seulement a voir si un problème
@@ -131,7 +132,8 @@ float vitesseGPS(){
     // v1 directement donné par le gps
     if (gps.location.isValid()){
       // Serial.println(gps.speed.kmph());
-      v1 = gps.speed.kmph(); // vitesse en km/h
+      v1 = gps.speed.mps(); // vitesse en m/s
+      // gps.speed.kmph() pour la vitesse en km/h
     }
     // else {
     //  Serial.println("error with gps data");

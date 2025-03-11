@@ -6,13 +6,20 @@
 
   - Ecrire sur Carte SD les données la trame :
     angle, vitesse1, vitesse2, puissance moteur
+<<<<<<< HEAD
     en °   en m/s               en W
+=======
+    en deg, en m/s,           en W
+>>>>>>> d10c0bf (Adding units)
 
   PIN LAYOUT cf Fritzing
   Les LEDs servent seulement a voir si un problème
   est arrivé lors de la mise en marche/de l'expérience
 */
 
+// TODO change d1 et d2, cf :
+// https://stackoverflow.com/questions/47028071/calculating-speed-from-set-of-longitude-and-latitudes-values-obtained-in-one-min
+   
 
 #include <SoftwareSerial.h>
 #include <TinyGPS++.h> // Module pour traduire la trame NMEA
@@ -33,6 +40,7 @@ File jTxt;
 
 // Creation des variables globales
 const int chipSelect = 10;
+const float R = 6371000; // rayon de la Terre (m)
 float u,i,v1,v2;
 int j,a=0;
 
@@ -128,13 +136,14 @@ float vitesseGPS(){
   if (gps.encode(gpsSerial.read() )){
     if (gps.location.isValid()){
     // On récupère v1 :
-      v1 = gps.speed.kmph(); // vitesse en km/h
+      v1 = gps.speed.mps(); // vitesse en m/s 
     }
   
     // On calcul v2 :
     t1 += gps.time.hour()*3600;
     t1 += gps.time.minute()*60;
     t1 += gps.time.second();
+    // lat et lng en degré
     d1 = pow(gps.location.lat(),2)-pow(gps.location.lng(),2);
     d1 = pow(d1,0.5);
         delay(100); // en ms
