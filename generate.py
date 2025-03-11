@@ -10,11 +10,14 @@
 
 
 '''
-    Code pour creer fichier csv de l'arduino
+    Code TIPE : Création artificiel de données 
     Format :
      angle, vitesse, vitesse, P 
             mesuré   calculé
 '''
+
+
+
 
 import csv
 import matplotlib.pyplot as plt
