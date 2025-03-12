@@ -8,5 +8,12 @@ PSI (2024/2025)
   <li><a href="https://github.com/AymericROUVRAIS/TIPE/tree/PostProcess">PostProcess</a> :  pour avoir les scripts de traitement des données venant des experiences avec Arduino</li>
 </ul>
 
+
+## TODO
+<ol>
+  <li>Diagram SysML</li>
+  <li>Verify python code</li>
+</ol>
+
 ## Référence:
 <a href="https://github.com/ProjectPhysX/FluidX3D">FluidX3D</a> de Dr. Moritz Lehmann
