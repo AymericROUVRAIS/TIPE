@@ -6,11 +6,7 @@
 
   - Ecrire sur Carte SD les données la trame :
     angle, vitesse1, vitesse2, puissance moteur
-<<<<<<< HEAD
-    en °   en m/s               en W
-=======
     en deg, en m/s,           en W
->>>>>>> d10c0bf (Adding units)
 
   PIN LAYOUT cf Fritzing
   Les LEDs servent seulement a voir si un problème
