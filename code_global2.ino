@@ -13,9 +13,6 @@
   est arrivé lors de la mise en marche/de l'expérience
 */
 
-// TODO change d1 et d2, cf :
-// https://stackoverflow.com/questions/47028071/calculating-speed-from-set-of-longitude-and-latitudes-values-obtained-in-one-min
-   
 
 #include <SoftwareSerial.h>
 #include <TinyGPS++.h> // Module pour traduire la trame NMEA
@@ -36,7 +33,8 @@ File jTxt;
 
 // Creation des variables globales
 const int chipSelect = 10;
-const float R = 6371000; // rayon de la Terre (m)
+const float Rt = 6371000; // rayon de la Terre (m)
+char logFileName[20];
 float u,i,v1,v2;
 int j,a=0;
 
@@ -64,13 +62,13 @@ void setup() {
   }
   
   // Faire un nouveau fichier log
-  char fileName[20];
   jTxt = SD.open("i.txt", FILE_WRITE);
-  int j = lireDerniereLigne().toInt();
+    int j = lireDerniereLigne().toInt(); // donne la dernière ligne de i.txt
   jTxt.close();
-
-  sprintf(fileName,"log%d.txt",j); // modifie fileName à log{j}.txt
-  logFile = SD.open(fileName, FILE_WRITE);
+  
+  // logFileName est le nom du fichier log
+  sprintf(logFileName,"log%d.txt",j); // modifie logFileName pour log{j}.txt
+  logFile = SD.open(logFileName, FILE_WRITE); // logFile est directement le fichier
   // Modifie i.txt
   if (logFile){
     logFile.println(j);
@@ -86,7 +84,7 @@ void setup() {
 
 String lireDerniereLigne(){
   // Fonction pour lire la derniere ligne d'un fichier de la carte SD
-  logFile = SD.open("j.txt", FILE_READ);
+  logFile = SD.open(logFileName, FILE_READ);
 
   if (logFile) { // Si le fichier s'ouvre
     String lastLine = "";    // variable pour la dernière ligne
@@ -134,29 +132,48 @@ float vitesseGPS(){
     // On récupère v1 :
       v1 = gps.speed.mps(); // vitesse en m/s 
     }
-  
+
+
     // On calcul v2 :
-    t1 += gps.time.hour()*3600;
+    float t1,t2;
+    float d1,d2,d;
+    float v2;
+    
+    // 1ere mesure
+    t1 += gps.time.hour()*3600; // Conversion de la date en s
     t1 += gps.time.minute()*60;
     t1 += gps.time.second();
     // lat et lng en degré
-    d1 = pow(gps.location.lat(),2)-pow(gps.location.lng(),2);
-    d1 = pow(d1,0.5);
-        delay(100); // en ms
+    d1 = gps.location.lat(); // d1 en degré
+    d2 = gps.location.lng();
+
+    // Attente pour la 2e mesure
+      delay(100); // en ms
+
+    // 2nd mesure
     t2 += gps.time.hour()*3600;
     t2 += gps.time.minute()*60;
     t2 += gps.time.second();
-    d2 = pow(gps.location.lat(),2)-pow(gps.location.lng(),2);
-    d2 = pow(d2,0.5);
-
-    v2 = (d1-d2)/(t1-t2);
+    // Calcul de la différence de degrés :
+    // différence de degrés à l'instant t et t+100ms
+    d1 -= gps.location.lat();
+    d2 -= gps.location.lng();
+    // Conversion en distance
+    d1 *= Rt*d1; // en m
+    d2 *= Rt*d2;
+    // d = sqrt(d1²+d²)
+    d = pow(d1,2)+pow(d2,2);
+    d = pow(d,0.5);
+    
+    v2 = d/(t1-t2);
   }
+
   return v1,v2;
 }
 
 File dataToSD(){
   // Fonction pour écrire les données sur log{i}.txt
-  logFile = SD.open("log.txt", FILE_WRITE);
+  logFile = SD.open(logFileName, FILE_WRITE);
   if (logFile) {
     // Ecriture du fichier
     logFile.print(a);
