@@ -1,4 +1,6 @@
 /*
+  Version simplifié, 1 seul fichier est utilisé
+
   Code TIPE :
   - Mesure angle de l'aile
   - Mesure intensité du courant
@@ -25,7 +27,6 @@ TinyGPSPlus gps;
 SoftwareSerial gpsSerial(8,9);
 // Variables pour comuniquer avec les fichiers de la carte SD
 File logFile;
-File jTxt;
 // Variable pour retrouver la correspondance des LEDs
 #define cardState   4 // RED LED    -> Allumé si problème d'écriture
 #define ifileState  3 // WHITE LED  -> Allumé si problème de lecture sur i.txt
@@ -34,7 +35,6 @@ File jTxt;
 // Creation des variables globales
 const int chipSelect = 10;
 const float Rt = 6371000; // rayon de la Terre (m)
-char logFileName[20];
 float u,i,v1,v2;
 int j,a=0;
 
@@ -61,63 +61,12 @@ void setup() {
     digitalWrite(cardState, HIGH);
   }
   
-  // Faire un nouveau fichier log
-  jTxt = SD.open("i.txt", FILE_WRITE);
-    int j = lireDerniereLigne().toInt(); // donne la dernière ligne de i.txt
-  jTxt.close();
-  
-  // logFileName est le nom du fichier log
-  sprintf(logFileName,"log%d.txt",j); // modifie logFileName pour log{j}.txt
-  logFile = SD.open(logFileName, FILE_WRITE); // logFile est directement le fichier
-  // Modifie i.txt
-  if (logFile){
-    logFile.println(j);
-    logFile.close();
-  }
-  else { // Si le fichier ne s'ouvre pas
-    digitalWrite(fileState, HIGH);
-  }
+  logFile = SD.open("log.txt", FILE_WRITE);
 
 }
 
 
 
-String lireDerniereLigne(){
-  // Fonction pour lire la derniere ligne d'un fichier de la carte SD
-  logFile = SD.open(logFileName, FILE_READ);
-
-  if (logFile) { // Si le fichier s'ouvre
-    String lastLine = "";    // variable pour la dernière ligne
-    String currentLine = ""; // variable pour lire chaque ligne
-
-    // Lit le fichier charactère par charactère
-    while (logFile.available()) {
-      char c = logFile.read(); // c est une ligne du fichier
-
-      if (c == '\n') {
-        // On a atteint le bout d'une ligne
-        lastLine = currentLine; // update la derniere ligne
-        currentLine = "";       // preparer pour la nouvelle ligne
-      } else {
-        // Ajoute le charactère à la ligne
-        currentLine += c;
-      }
-    }
-
-    // A la fin, lastLine = la derniere ligne du fichier
-    if (currentLine.length() > 0) {
-      lastLine = currentLine;
-    }
-
-    logFile.close();
-
-    return lastLine;
-  
-  } 
-  else { // Le fichier ne s'ouvre pas
-    digitalWrite(ifileState, HIGH);
-  }
-}
 
 float vitesseGPS(){
   /* Fonction qui récupère la vitesse du GPS
@@ -176,7 +125,7 @@ File dataToSD(){
   // Fonction pour écrire les données sur log{i}.txt
   logFile = SD.open(logFileName, FILE_WRITE);
   if (logFile) {
-    // Ecriture du fichier
+    // Ecriture sur le fichier
     logFile.print(a);
       logFile.print(", ");
     logFile.print(v1);

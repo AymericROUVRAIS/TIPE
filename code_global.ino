@@ -35,6 +35,8 @@ File jTxt;
 
 // Creation des variables globales
 const int chipSelect = 10;
+const float Rt = 6371000; // rayon de la Terre (m)
+char logFileName[20];
 float u,i,v1,v2;
 int j,a=0;
 
