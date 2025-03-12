@@ -10,10 +10,10 @@ PSI (2024/2025)
 
 
 ## TODO
-<ol>
+<dl>
   <li>Diagram SysML</li>
   <li>Verify python code</li>
-</ol>
+</dl>
 
 ## Référence:
 <a href="https://github.com/ProjectPhysX/FluidX3D">FluidX3D</a> de Dr. Moritz Lehmann
