@@ -33,7 +33,7 @@ File jTxt;
 
 // Creation des variables globales
 const int chipSelect = 10;
-const float Rt = 6371000; // rayon de la Terre (m)
+const float Rt = 6.3E6; // rayon de la Terre (m)
 char logFileName[20];
 float u,i,v1,v2;
 int j,a=0;
@@ -132,7 +132,7 @@ float vitesseGPS(){
     if (gps.location.isValid()){
     // On récupère v1 :
       v1 = gps.speed.mps(); // vitesse en m/s 
-    }
+    
 
 
     // On calcul v2 :
@@ -167,6 +167,7 @@ float vitesseGPS(){
     d = pow(d,0.5);
     
     v2 = d/(t1-t2);
+    }
   }
 
   return v1,v2;
