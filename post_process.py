@@ -132,7 +132,7 @@ v = cherche_angle(angle)
 
 # Barre d'erreurs
 err = []
-# On met que quelques incertitudes
+# On met seulement quelques incertitudes
 for i in range(len(v)//100):
     err += []
     err += [0 for i in range(len(v))]
