@@ -215,7 +215,7 @@ void loop() {
   a = a*270/1023;
 
   // Lecture de la vitesse
-  v = vitesseGPS();
+  v1,v2 = vitesseGPS();
 
   // Ecriture sur la carte SD
   dataToSD();

@@ -60,9 +60,6 @@ void setup() {
   if (!SD.begin(chipSelect)) {
     digitalWrite(cardState, HIGH);
   }
-  
-  logFile = SD.open("log.txt", FILE_WRITE);
-
 }
 
 
@@ -123,7 +120,7 @@ float vitesseGPS(){
 
 File dataToSD(){
   // Fonction pour écrire les données sur log{i}.txt
-  logFile = SD.open(logFileName, FILE_WRITE);
+  logFile = SD.open("log.txt", FILE_WRITE);
   if (logFile) {
     // Ecriture sur le fichier
     logFile.print(a);
@@ -163,7 +160,7 @@ void loop() {
   a = a*270/1023;
 
   // Lecture de la vitesse
-  v = vitesseGPS();
+  v1,v2 = vitesseGPS();
 
   // Ecriture sur la carte SD
   dataToSD();
