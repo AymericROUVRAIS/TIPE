@@ -29,9 +29,10 @@ def traitement(i):
     '''
     traitement(int) -> dict(int : list), list
     Prend le fichier log{i}.txt
-    Renvoi un dictionnaire sous la forme : 
+    Renvoi :
+        un dictionnaire sous la forme : 
         {angle1 : [(vitesse1,vitesse2,Puissance), ...]} 
-        et [ecart1,ecart2,...]
+        et une liste [ecart1,ecart2,...]
     '''
 
 
