@@ -32,11 +32,21 @@ File logFile;
 #define ifileState  3 // WHITE LED  -> Allumé si problème de lecture sur i.txt
 #define fileState   2 // YELLOW LED -> Allumé si problème de lecture sur log.txt
 
+
+
+// Définition d'un Tuple
+struct Tuple {
+  float first;  // Premier élément du 2-uplet
+  float second; // Deuxième élément du 2-uplet
+};
+
+
 // Creation des variables globales
 const int chipSelect = 10;
 const float Rt = 6371000; // rayon de la Terre (m)
 float u,i,v1,v2;
 int j,a=0;
+Tuple v;
 
 
 
@@ -65,75 +75,103 @@ void setup() {
 
 
 
-float vitesseGPS(){
-  /* Fonction qui récupère la vitesse du GPS
-     Prend 2 vitesse de l'avion:
+// =================
+//      Functions
+// =================
+Tuple vitesseGPS(){
+  /* Fonction qui récupère la vitesse du GPS 
+    Prend 2 vitesse de l'avion:
      - Une donné par le module GPS
      - Une calculé à la main
      Pour avoir une vitesse plus précise
   */
-  
+
+  Tuple vit;
 
   if (gps.encode(gpsSerial.read() )){
+    // v1 directement donné par le gps
     if (gps.location.isValid()){
-    // On récupère v1 :
-      v1 = gps.speed.mps(); // vitesse en m/s 
-    }
+      Serial.println(gps.speed.kmph());
+      v1 = gps.speed.kmph(); // vitesse en m/s
+      // gps.speed.mps(); // pour la vitesse en km/h
 
+      // else {
+      //  Serial.println("error with gps data");
+      // }
 
-    // On calcul v2 :
-    float t1,t2;
-    float d1,d2,d;
-    float v2;
-    
-    // 1ere mesure
-    t1 += gps.time.hour()*3600; // Conversion de la date en s
-    t1 += gps.time.minute()*60;
-    t1 += gps.time.second();
-    // lat et lng en degré
-    d1 = gps.location.lat(); // d1 en degré
-    d2 = gps.location.lng();
+      // On calcul v2 :
+      float t1,t2;
+      float d1,d2,d;
+      
+      // 1ere mesure
+      t1 += gps.time.hour()*3600; // Conversion de la date en s
+      t1 += gps.time.minute()*60;
+      t1 += gps.time.second();
+      // lat et lng en degré
+      d1 = gps.location.lat(); // d1 en degré
+      d2 = gps.location.lng();
 
-    // Attente pour la 2e mesure
+      // Attente pour la 2e mesure
       delay(100); // en ms
 
-    // 2nd mesure
-    t2 += gps.time.hour()*3600;
-    t2 += gps.time.minute()*60;
-    t2 += gps.time.second();
-    // Calcul de la différence de degrés :
-    // différence de degrés à l'instant t et t+100ms
-    d1 -= gps.location.lat();
-    d2 -= gps.location.lng();
-    // Conversion en distance
-    d1 *= Rt*d1; // en m
-    d2 *= Rt*d2;
-    // d = sqrt(d1²+d²)
-    d = pow(d1,2)+pow(d2,2);
-    d = pow(d,0.5);
-    
-    v2 = d/(t1-t2);
-  }
+      // 2nd mesure
+      t2 += gps.time.hour()*3600;
+      t2 += gps.time.minute()*60;
+      t2 += gps.time.second();
+      // Calcul de la différence de degrés :
+      // différence de degrés à l'instant t et t+100ms
+      d1 -= gps.location.lat();
+      d2 -= gps.location.lng();
+      // Conversion en distance
+      d1 *= Rt*d1; // en m
+      d2 *= Rt*d2;
+      // d = sqrt(d1²+d²)
+      d = pow(d1,2)+pow(d2,2);
+      d = pow(d,0.5);
+      
+      v2 = d/(t1-t2);
+    }
 
-  return v1,v2;
+  vit.first = v1;
+  vit.second = v2;
+  return vit;
+  }
 }
 
 File dataToSD(){
-  // Fonction pour écrire les données sur log{i}.txt
   logFile = SD.open("log.txt", FILE_WRITE);
   if (logFile) {
-    // Ecriture sur le fichier
-    logFile.print(a);
+    Serial.print("Writing to log.txt...");
+    logFile.print(a); // Ecriture du fichier
       logFile.print(", ");
-    logFile.print(v1);
+    logFile.print(v.first);
       logFile.print(", ");
-    logFile.print(v2);
+    logFile.println(v.second);
       logFile.print(", ");
     logFile.println(i);
-    // Fermeture du fichier
+
+    
     logFile.close();
-  } 
-  else { // Si le fichier ne s'ouvre pas
+    Serial.println("done.");
+  } else {
+    // Si le fichier ne s'ouvre pas
+    Serial.println("error opening log.txt");
+    digitalWrite(fileState, HIGH);
+  }
+
+  // re-ouvre le fichier pour lire
+  logFile = SD.open("test.txt");
+  if (logFile) {
+    Serial.println("test.txt:");
+
+    // Lit le fichier jusqu'à la fin
+    while (logFile.available()) {
+      Serial.write(logFile.read());
+    }
+    logFile.close();
+  }
+  else {
+    Serial.println("error opening log.txt");
     digitalWrite(fileState, HIGH);
   }
 }
@@ -160,7 +198,7 @@ void loop() {
   a = a*270/1023;
 
   // Lecture de la vitesse
-  v1,v2 = vitesseGPS();
+  v = vitesseGPS();
 
   // Ecriture sur la carte SD
   dataToSD();

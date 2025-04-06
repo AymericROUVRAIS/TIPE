@@ -33,56 +33,33 @@ File jTxt;
 #define ifileState  3 // WHITE LED  -> Allumé si problème de lecture sur i.txt
 #define fileState   2 // YELLOW LED -> Allumé si problème de lecture sur log.txt
 
+
+
+// Définition d'un Tuple
+struct Tuple {
+  float first;  // Premier élément du 2-uplet
+  float second; // Deuxième élément du 2-uplet
+};
+
+
+
 // Creation des variables globales
 const int chipSelect = 10;
 const float Rt = 6371000; // rayon de la Terre (m)
 char logFileName[20];
 float u,i,v1,v2;
 int j,a=0;
+Tuple v;
+
+
+
+
 
 
 
 // =================
-//      Setup
+//      Functions
 // =================
-void setup() {
-  Serial.begin(9600);
-  gpsSerial.begin(9600);
-
-  // Définir les LEDs
-  pinMode(ifileState, OUTPUT);
-  pinMode(cardState, OUTPUT);
-  pinMode(fileState, OUTPUT);
-  // Initialisé les LEDs
-  digitalWrite(ifileState, LOW);
-  digitalWrite(cardState, LOW);
-  digitalWrite(fileState, LOW);
-
-  // Serial.print("Initializing SD card...");
-  if (!SD.begin(chipSelect)) {
-    // Serial.println("initialization failed");
-    digitalWrite(cardState, HIGH);
-  }
-  // Serial.println("initialization done.");
-  
-  // Faire un nouveau fichier log
-  char fileName[20];
-  jTxt = SD.open("i.txt", FILE_WRITE);
-  int j = lireDerniereLigne().toInt();
-  jTxt.close();
-
-  sprintf(fileName,"log%d.txt",j); // modifie fileName à log{j}.txt
-  logFile = SD.open(fileName, FILE_WRITE);
-  if (logFile){
-    logFile.println(j);
-    logFile.close();
-  }
-  else {
-    digitalWrite(fileState, HIGH);
-  }
-
-}
-
 String lireDerniereLigne(){
   logFile = SD.open("test.txt", FILE_READ);
 
@@ -108,8 +85,8 @@ String lireDerniereLigne(){
       lastLine = currentLine;
     }
 
-    // Serial.print("Last line: ");
-    // Serial.println(lastLine);
+    Serial.print("Last line: ");
+    Serial.println(lastLine);
 
     logFile.close();
 
@@ -117,66 +94,88 @@ String lireDerniereLigne(){
   
   } else {
     // Fichier ne s'ouvre pas
-    // Serial.println("Error opening file.");
+    Serial.println("Error opening file.");
     digitalWrite(ifileState, HIGH);
   }
 }
 
-float vitesseGPS(){
+Tuple vitesseGPS(){
   /* Fonction qui récupère la vitesse du GPS 
     Prend 2 vitesse de l'avion:
      - Une donné par le module GPS
      - Une calculé à la main
      Pour avoir une vitesse plus précise
   */
-  
+  Tuple vit;
+
   if (gps.encode(gpsSerial.read() )){
     // v1 directement donné par le gps
     if (gps.location.isValid()){
-      // Serial.println(gps.speed.kmph());
-      v1 = gps.speed.mps(); // vitesse en m/s
-      // gps.speed.kmph() pour la vitesse en km/h
+      Serial.println(gps.speed.kmph());
+      v1 = gps.speed.kmph(); // vitesse en m/s
+      // gps.speed.mps(); // pour la vitesse en km/h
+
+      // else {
+      //  Serial.println("error with gps data");
+      // }
+
+      // On calcul v2 :
+      float t1,t2;
+      float d1,d2,d;
+      
+      // 1ere mesure
+      t1 += gps.time.hour()*3600; // Conversion de la date en s
+      t1 += gps.time.minute()*60;
+      t1 += gps.time.second();
+      // lat et lng en degré
+      d1 = gps.location.lat(); // d1 en degré
+      d2 = gps.location.lng();
+
+      // Attente pour la 2e mesure
+      delay(100); // en ms
+
+      // 2nd mesure
+      t2 += gps.time.hour()*3600;
+      t2 += gps.time.minute()*60;
+      t2 += gps.time.second();
+      // Calcul de la différence de degrés :
+      // différence de degrés à l'instant t et t+100ms
+      d1 -= gps.location.lat();
+      d2 -= gps.location.lng();
+      // Conversion en distance
+      d1 *= Rt*d1; // en m
+      d2 *= Rt*d2;
+      // d = sqrt(d1²+d²)
+      d = pow(d1,2)+pow(d2,2);
+      d = pow(d,0.5);
+      
+      v2 = d/(t1-t2);
     }
-    // else {
-    //  Serial.println("error with gps data");
-    // }
 
-    // Calcul de v2 :
-    t1 += gps.time.hour()*3600;
-    t1 += gps.time.minute()*60;
-    t1 += gps.time.second();
-    d1 = pow(gps.location.lat(),2)-pow(gps.location.lng(),2);
-    d1 = pow(d1,0.5);
-        delay(500); // en ms
-    t2 += gps.time.hour()*3600;
-    t2 += gps.time.minute()*60;
-    t2 += gps.time.second();
-    d2 = pow(gps.location.lat(),2)-pow(gps.location.lng(),2);
-    d2 = pow(d2,0.5);
-
-    v2 = (d1-d2)/(t1-t2);
-  return v1,v2;
+  vit.first = v1;
+  vit.second = v2;
+  return vit;
   }
 }
 
 File dataToSD(){
-  logFile = SD.open("log.txt", FILE_WRITE);
+  logFile = SD.open(logFileName, FILE_WRITE);
   if (logFile) {
-    // Serial.print("Writing to log.txt...");
+    Serial.print("Writing to log.txt...");
     logFile.print(a); // Ecriture du fichier
       logFile.print(", ");
-    logFile.print(v1);
+    logFile.print(v.first);
       logFile.print(", ");
-    logFile.println(v2);
+    logFile.println(v.second);
       logFile.print(", ");
     logFile.println(i);
 
     
     logFile.close();
-    // Serial.println("done.");
+    Serial.println("done.");
   } else {
     // Si le fichier ne s'ouvre pas
-    // Serial.println("error opening log.txt");
+    Serial.println("error opening log.txt");
     digitalWrite(fileState, HIGH);
   }
 
@@ -192,10 +191,55 @@ File dataToSD(){
     logFile.close();
   }
   else {
-    // Serial.println("error opening log.txt");
+    Serial.println("error opening log.txt");
     digitalWrite(fileState, HIGH);
   }
 }
+
+// =================
+//      Setup
+// =================
+void setup() {
+  Serial.begin(9600);
+  gpsSerial.begin(9600);
+
+  // Définir les LEDs
+  pinMode(ifileState, OUTPUT);
+  pinMode(cardState, OUTPUT);
+  pinMode(fileState, OUTPUT);
+  // Initialisé les LEDs
+  digitalWrite(ifileState, LOW);
+  digitalWrite(cardState, LOW);
+  digitalWrite(fileState, LOW);
+
+  Serial.print("Initializing SD card...");
+  if (!SD.begin(chipSelect)) {
+    Serial.println("initialization failed");
+    digitalWrite(cardState, HIGH);
+  }
+  // Serial.println("initialization done.");
+  
+  // Faire un nouveau fichier log
+  char fileName[20];
+  jTxt = SD.open("i.txt", FILE_WRITE);
+  int j = lireDerniereLigne().toInt();
+  jTxt.println(j+1);
+  jTxt.close();
+
+  sprintf(fileName,"log%d.txt",j); // modifie fileName à log{j}.txt
+  logFile = SD.open("i.txt", FILE_WRITE);
+  if (logFile){
+    
+    logFile.close();
+  }
+  else {
+    digitalWrite(fileState, HIGH);
+  }
+
+}
+
+
+
 
 
 
@@ -214,8 +258,8 @@ void loop() {
   i = 14.8*i;
 
 
-  // Serial.print("I : ");
-  // Serial.println(i);
+  Serial.print("P (en W): ");
+  Serial.println(i);
 
 
   // lecture de l'angle
@@ -227,4 +271,7 @@ void loop() {
   v = vitesseGPS();
 
   dataToSD();
+
+
+  delay(1000);
 }

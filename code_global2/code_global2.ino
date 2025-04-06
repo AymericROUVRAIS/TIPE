@@ -68,10 +68,10 @@ void setup() {
   
   // logFileName est le nom du fichier log
   sprintf(logFileName,"log%d.txt",j); // modifie logFileName pour log{j}.txt
-  logFile = SD.open(logFileName, FILE_WRITE); // logFile est directement le fichier
+  logFile = SD.open("i.txt", FILE_WRITE); // logFile est directement le fichier
   // Modifie i.txt
   if (logFile){
-    logFile.println(j);
+    logFile.println(j+1);
     logFile.close();
   }
   else { // Si le fichier ne s'ouvre pas
