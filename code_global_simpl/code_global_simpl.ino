@@ -1,5 +1,6 @@
 /*
   Version simplifié, 1 seul fichier est utilisé
+  Avec serial monitor
 
   Code TIPE :
   - Mesure angle de l'aile
@@ -146,11 +147,11 @@ File dataToSD(){
       logFile.print(", ");
     logFile.print(v.first);
       logFile.print(", ");
-    logFile.println(v.second);
+    logFile.print(v.second);
       logFile.print(", ");
     logFile.println(i);
 
-    
+  
     logFile.close();
     Serial.println("done.");
   } else {
@@ -187,6 +188,9 @@ void loop() {
   u = analogRead(A0);
   // Conversion en intensité du courant capté
   i = 0.39*(u-512);
+  Serial.print("Intensity : ");
+  Serial.println(i);
+
   // Conversion en puissance électrique
   // Le moteur est commandé seulement en intensité
   // U = 14.8V pour du 4s
@@ -201,5 +205,16 @@ void loop() {
   v = vitesseGPS();
 
   // Ecriture sur la carte SD
-  dataToSD();
+  // dataToSD();
+
+  Serial.print("Angle : ");
+  Serial.print(a); // Ecriture du fichier
+    Serial.print(", Speed GPS : ");
+  Serial.print(v.first);
+    Serial.print(", Speed calulated : ");
+  Serial.print(v.second);
+    Serial.print(", Power : ");
+  Serial.println(i);
+  Serial.println();
+  delay(500); // pour la faciliter de lecture  
 }
