@@ -2,14 +2,14 @@
   Version simplifié, 1 seul fichier est utilisé
   Avec serial monitor
 
-  Code TIPE :
-  - Mesure angle de l'aile
-  - Mesure intensité du courant
-  - Mesure vitesse
+  Code TIPE : 
+  - Mesure de l'angle de l'aile
+  - Mesure de l'intensité du courant
+  - Mesure de la vitesse p/r au sol
 
   - Ecrire sur Carte SD les données la trame :
-    angle, vitesse1, vitesse2, puissance moteur
-    en deg, en m/s,           en W
+    angle,  vitesse1, vitesse2, puissance moteur
+    en deg, en m/s,             en W
 
   PIN LAYOUT cf Fritzing
   Les LEDs servent seulement a voir si un problème
@@ -34,44 +34,22 @@ File logFile;
 #define fileState   2 // YELLOW LED -> Allumé si problème de lecture sur log.txt
 
 
-
 // Définition d'un Tuple
 struct Tuple {
-  float first;  // Premier élément du 2-uplet
+  float first;  // Premier  élément du 2-uplet
   float second; // Deuxième élément du 2-uplet
 };
 
 
 // Creation des variables globales
-const int chipSelect = 10;
+const int CHIP_SELECT = 10;
+const int NUM_SAMPLES=256;
 const float Rt = 6371000; // rayon de la Terre (m)
-float u,i,v1,v2;
-int j,a=0;
+float u,i,p,v1,v2;
+int j,angle=0,samples[NUM_SAMPLES];
 Tuple v;
 
 
-
-// =================
-//      Setup
-// =================
-void setup() {
-  Serial.begin(9600);
-  gpsSerial.begin(9600);
-
-  // Définir les LEDs
-  pinMode(ifileState, OUTPUT);
-  pinMode(cardState, OUTPUT);
-  pinMode(fileState, OUTPUT);
-  // Initialisé les LEDs
-  digitalWrite(ifileState, LOW);
-  digitalWrite(cardState, LOW);
-  digitalWrite(fileState, LOW);
-
-  // Initialisation de la carte SD
-  if (!SD.begin(chipSelect)) {
-    digitalWrite(cardState, HIGH);
-  }
-}
 
 
 
@@ -79,6 +57,13 @@ void setup() {
 // =================
 //      Functions
 // =================
+float calulRMS() {
+
+
+
+}
+
+
 Tuple vitesseGPS(){
   /* Fonction qui récupère la vitesse du GPS 
     Prend 2 vitesse de l'avion:
@@ -149,12 +134,12 @@ File dataToSD(){
       logFile.print(", ");
     logFile.print(v.second);
       logFile.print(", ");
-    logFile.println(i);
-
+    logFile.println(p);
   
     logFile.close();
     Serial.println("done.");
-  } else {
+  } 
+  else {
     // Si le fichier ne s'ouvre pas
     Serial.println("error opening log.txt");
     digitalWrite(fileState, HIGH);
@@ -181,25 +166,66 @@ File dataToSD(){
 
 
 // =================
-//      Looop
+//      Setup
+// =================
+void setup() {
+  // Serial plus rapide pour respecter le critère de Shanon-Nyquist
+  Serial.begin(115200);
+  gpsSerial.begin(9600);
+
+  // Définir les LEDs
+  pinMode(ifileState, OUTPUT);
+  pinMode(cardState, OUTPUT);
+  pinMode(fileState, OUTPUT);
+  // Initialisé les LEDs
+  digitalWrite(ifileState, LOW);
+  digitalWrite(cardState, LOW);
+  digitalWrite(fileState, LOW);
+
+  // Initialisation de la carte SD
+  if (!SD.begin(CHIP_SELECT)) {
+    digitalWrite(cardState, HIGH);
+  }
+}
+
+
+
+// =================
+//      Loop
 // =================
 void loop() {
   // Lecture tension capteur effet Hall
   u = analogRead(A0);
   // Conversion en intensité du courant capté
   i = 0.39*(u-512);
+
+  // Si le capteur est mis en série avec la batterie :
+  // i = l'intensité du moteur
   Serial.print("Intensity : ");
   Serial.println(i);
+
+  // Si le capteur est branché sur une phase :
+  // i = l'intensité d'une phase
+  float sommeCarre=0; 
+  for (int k=0; k<NUM_SAMPLES; k++){
+    sommeCarre += i**2;
+  }
+  // Calcul de la valeur efficace de i
+  i = sqrt(sommeCarre/NUM_SAMPLES);
+
+  Serial.print("Intensity RMS : ");
+  Serial.println(i);
+
 
   // Conversion en puissance électrique
   // Le moteur est commandé seulement en intensité
   // U = 14.8V pour du 4s
-  i = 14.8*i;
+  p = 14.8*i;
 
   // Lecture de l'angle de l'aile
-  a = analogRead(A1);
+  angle = analogRead(A1);
   // Conversion de byte en degrée
-  a = a*270/1023;
+  angle = angle*270/1023;
 
   // Lecture de la vitesse
   v = vitesseGPS();
