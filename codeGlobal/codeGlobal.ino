@@ -14,6 +14,7 @@
 */
 
 
+// Importatiopn des modules nécessaires
 #include <SoftwareSerial.h>
 #include <TinyGPS++.h> // Module pour traduire la trame NMEA
 #include <SD.h>
@@ -33,10 +34,129 @@ File jTxt;
 
 // Creation des variables globales
 const int chipSelect = 10;
+const int NUM_SAMPLES=256;
 const float Rt = 6.3E6; // rayon de la Terre (m)
 char logFileName[20];
-float u,i,v1,v2;
-int j,a=0;
+float u,i,p,v1,v2;
+int j,angle=0;
+Tuple v;
+
+
+
+
+
+
+// =================
+//      Functions
+// =================
+String lireDerniereLigne(){
+  // Fonction pour lire la derniere ligne d'un fichier de la carte SD
+  logFile = SD.open(logFileName, FILE_READ);
+
+  if (logFile) { // Si le fichier s'ouvre
+    String lastLine = "";    // variable pour la dernière ligne
+    String currentLine = ""; // variable pour lire chaque ligne
+
+    // Lit le fichier charactère par charactère
+    while (logFile.available()) {
+      char c = logFile.read(); // c est une ligne du fichier
+
+      if (c == '\n') {
+        // On a atteint le bout d'une ligne
+        lastLine = currentLine; // update la derniere ligne
+        currentLine = "";       // preparer pour la nouvelle ligne
+      } else {
+        // Ajoute le charactère à la ligne
+        currentLine += c;
+      }
+    }
+
+    // A la fin, lastLine = la derniere ligne du fichier
+    if (currentLine.length() > 0) {
+      lastLine = currentLine;
+    }
+
+    logFile.close();
+
+    return lastLine;
+  
+  } 
+  else { // Le fichier ne s'ouvre pas
+    digitalWrite(ifileState, HIGH);
+  }
+}
+
+Tuple vitesseGPS(){
+  /* Fonction qui récupère la vitesse du GPS
+     Prend 2 vitesse de l'avion:
+     - Une donné par le module GPS
+     - Une calculé à la main
+     Pour avoir une vitesse plus précise
+  */
+  
+
+  if (gps.encode(gpsSerial.read() )){
+    if (gps.location.isValid()){
+    // On récupère v1 :
+    v1 = gps.speed.mps(); // vitesse en m/s 
+    
+
+    // On calcul v2 :
+    float t1,t2;
+    float d1,d2,d;
+    float v2;
+    
+    // 1ere mesure
+    t1 += gps.time.hour()*3600; // Conversion de la date en s
+    t1 += gps.time.minute()*60;
+    t1 += gps.time.second();
+    // lat et lng en degré
+    d1 = gps.location.lat(); // d1 en degré
+    d2 = gps.location.lng();
+
+    // Attente pour la 2nd mesure
+    delay(100); // en ms
+
+    // 2nd mesure
+    t2 += gps.time.hour()*3600;
+    t2 += gps.time.minute()*60;
+    t2 += gps.time.second();
+    // Calcul de la différence de degrés : entre l'instant t et t+100ms
+    d1 -= gps.location.lat();
+    d2 -= gps.location.lng();
+    // Conversion en une distance
+    d1 *= Rt*d1; // en m
+    d2 *= Rt*d2;
+    // d = sqrt(d1²+d²)
+    d = pow(d1,2)+pow(d2,2);
+    d = sqrt(d);
+    
+    v2 = d/(t1-t2);
+    }
+  }
+
+  return v1,v2;
+}
+
+File dataToSD(){
+  // Fonction pour écrire les données sur log{i}.txt
+  logFile = SD.open(logFileName, FILE_WRITE);
+  if (logFile) {
+    // Ecriture du fichier
+    logFile.print(a);
+      logFile.print(", ");
+    logFile.print(v1);
+      logFile.print(", ");
+    logFile.print(v2);
+      logFile.print(", ");
+    logFile.println(i);
+    // Fermeture du fichier
+    logFile.close();
+  } 
+  else { // Si le fichier ne s'ouvre pas
+    digitalWrite(fileState, HIGH);
+  }
+}
 
 
 
@@ -79,120 +199,6 @@ void setup() {
   }
 
 }
-
-
-
-String lireDerniereLigne(){
-  // Fonction pour lire la derniere ligne d'un fichier de la carte SD
-  logFile = SD.open(logFileName, FILE_READ);
-
-  if (logFile) { // Si le fichier s'ouvre
-    String lastLine = "";    // variable pour la dernière ligne
-    String currentLine = ""; // variable pour lire chaque ligne
-
-    // Lit le fichier charactère par charactère
-    while (logFile.available()) {
-      char c = logFile.read(); // c est une ligne du fichier
-
-      if (c == '\n') {
-        // On a atteint le bout d'une ligne
-        lastLine = currentLine; // update la derniere ligne
-        currentLine = "";       // preparer pour la nouvelle ligne
-      } else {
-        // Ajoute le charactère à la ligne
-        currentLine += c;
-      }
-    }
-
-    // A la fin, lastLine = la derniere ligne du fichier
-    if (currentLine.length() > 0) {
-      lastLine = currentLine;
-    }
-
-    logFile.close();
-
-    return lastLine;
-  
-  } 
-  else { // Le fichier ne s'ouvre pas
-    digitalWrite(ifileState, HIGH);
-  }
-}
-
-float vitesseGPS(){
-  /* Fonction qui récupère la vitesse du GPS
-     Prend 2 vitesse de l'avion:
-     - Une donné par le module GPS
-     - Une calculé à la main
-     Pour avoir une vitesse plus précise
-  */
-  
-
-  if (gps.encode(gpsSerial.read() )){
-    if (gps.location.isValid()){
-    // On récupère v1 :
-      v1 = gps.speed.mps(); // vitesse en m/s 
-    
-
-
-    // On calcul v2 :
-    float t1,t2;
-    float d1,d2,d;
-    float v2;
-    
-    // 1ere mesure
-    t1 += gps.time.hour()*3600; // Conversion de la date en s
-    t1 += gps.time.minute()*60;
-    t1 += gps.time.second();
-    // lat et lng en degré
-    d1 = gps.location.lat(); // d1 en degré
-    d2 = gps.location.lng();
-
-    // Attente pour la 2e mesure
-      delay(100); // en ms
-
-    // 2nd mesure
-    t2 += gps.time.hour()*3600;
-    t2 += gps.time.minute()*60;
-    t2 += gps.time.second();
-    // Calcul de la différence de degrés :
-    // différence de degrés à l'instant t et t+100ms
-    d1 -= gps.location.lat();
-    d2 -= gps.location.lng();
-    // Conversion en distance
-    d1 *= Rt*d1; // en m
-    d2 *= Rt*d2;
-    // d = sqrt(d1²+d²)
-    d = pow(d1,2)+pow(d2,2);
-    d = pow(d,0.5);
-    
-    v2 = d/(t1-t2);
-    }
-  }
-
-  return v1,v2;
-}
-
-File dataToSD(){
-  // Fonction pour écrire les données sur log{i}.txt
-  logFile = SD.open(logFileName, FILE_WRITE);
-  if (logFile) {
-    // Ecriture du fichier
-    logFile.print(a);
-      logFile.print(", ");
-    logFile.print(v1);
-      logFile.print(", ");
-    logFile.print(v2);
-      logFile.print(", ");
-    logFile.println(i);
-    // Fermeture du fichier
-    logFile.close();
-  } 
-  else { // Si le fichier ne s'ouvre pas
-    digitalWrite(fileState, HIGH);
-  }
-}
-
 
 
 

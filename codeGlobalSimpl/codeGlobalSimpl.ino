@@ -1,6 +1,7 @@
 /*
   Version simplifié, 1 seul fichier est utilisé
-  Avec serial monitor
+  Pour capteur à effet hall sur une phase du moteur
+  Sans serial monitor
 
   Code TIPE : 
   - Mesure de l'angle de l'aile
@@ -46,7 +47,7 @@ const int CHIP_SELECT = 10;
 const int NUM_SAMPLES=256;
 const float Rt = 6371000; // rayon de la Terre (m)
 float u,i,p,v1,v2;
-int j,angle=0,samples[NUM_SAMPLES];
+int j,angle=0;
 Tuple v;
 
 
@@ -57,13 +58,6 @@ Tuple v;
 // =================
 //      Functions
 // =================
-float calulRMS() {
-
-
-
-}
-
-
 Tuple vitesseGPS(){
   /* Fonction qui récupère la vitesse du GPS 
     Prend 2 vitesse de l'avion:
@@ -78,12 +72,8 @@ Tuple vitesseGPS(){
     // v1 directement donné par le gps
     if (gps.location.isValid()){
       Serial.println(gps.speed.kmph());
-      v1 = gps.speed.kmph(); // vitesse en m/s
-      // gps.speed.mps(); // pour la vitesse en km/h
-
-      // else {
-      //  Serial.println("error with gps data");
-      // }
+      v1 = gps.speed.mps(); // vitesse en km/h
+      // gps.speed.kmph() pour la vitesse en m/s
 
       // On calcul v2 :
       float t1,t2;
@@ -111,15 +101,15 @@ Tuple vitesseGPS(){
       // Conversion en distance
       d1 *= Rt*d1; // en m
       d2 *= Rt*d2;
-      // d = sqrt(d1²+d²)
+      // On calcul : d = sqrt(d1²+d²)
       d = pow(d1,2)+pow(d2,2);
-      d = pow(d,0.5);
+      d = sqrt(d);
       
       v2 = d/(t1-t2);
     }
 
-  vit.first = v1;
-  vit.second = v2;
+  vit.first = v1; // en m/s
+  vit.second = v2; // en m/s
   return vit;
   }
 }
@@ -127,29 +117,26 @@ Tuple vitesseGPS(){
 File dataToSD(){
   logFile = SD.open("log.txt", FILE_WRITE);
   if (logFile) {
-    Serial.print("Writing to log.txt...");
-    logFile.print(a); // Ecriture du fichier
+    logFile.print(angle); // Ecriture du fichier
       logFile.print(", ");
+    logFile.print(v1);
+      logFile.print(",");
+    logFile.println(p);
     logFile.print(v.first);
       logFile.print(", ");
     logFile.print(v.second);
       logFile.print(", ");
-    logFile.println(p);
   
     logFile.close();
-    Serial.println("done.");
   } 
   else {
     // Si le fichier ne s'ouvre pas
-    Serial.println("error opening log.txt");
     digitalWrite(fileState, HIGH);
   }
 
   // re-ouvre le fichier pour lire
   logFile = SD.open("test.txt");
   if (logFile) {
-    Serial.println("test.txt:");
-
     // Lit le fichier jusqu'à la fin
     while (logFile.available()) {
       Serial.write(logFile.read());
@@ -157,11 +144,9 @@ File dataToSD(){
     logFile.close();
   }
   else {
-    Serial.println("error opening log.txt");
     digitalWrite(fileState, HIGH);
   }
 }
-
 
 
 
@@ -170,7 +155,7 @@ File dataToSD(){
 // =================
 void setup() {
   // Serial plus rapide pour respecter le critère de Shanon-Nyquist
-  Serial.begin(115200);
+  Serial.begin(9600); // inutile si le capteur n'est pas sur une phase
   gpsSerial.begin(9600);
 
   // Définir les LEDs
@@ -194,27 +179,20 @@ void setup() {
 //      Loop
 // =================
 void loop() {
-  // Lecture tension capteur effet Hall
-  u = analogRead(A0);
-  // Conversion en intensité du courant capté
-  i = 0.39*(u-512);
-
-  // Si le capteur est mis en série avec la batterie :
-  // i = l'intensité du moteur
-  Serial.print("Intensity : ");
-  Serial.println(i);
-
   // Si le capteur est branché sur une phase :
   // i = l'intensité d'une phase
   float sommeCarre=0; 
   for (int k=0; k<NUM_SAMPLES; k++){
-    sommeCarre += i**2;
+    // Lecture tension capteur effet Hall
+    u = analogRead(A0);
+    // Conversion en intensité du courant capté
+    i = 0.39*(u-512)/3;
+    sommeCarre += i*i;
   }
   // Calcul de la valeur efficace de i
   i = sqrt(sommeCarre/NUM_SAMPLES);
 
-  Serial.print("Intensity RMS : ");
-  Serial.println(i);
+  
 
 
   // Conversion en puissance électrique
@@ -225,22 +203,11 @@ void loop() {
   // Lecture de l'angle de l'aile
   angle = analogRead(A1);
   // Conversion de byte en degrée
-  angle = angle*270/1023;
+  angle = 26+angle*270/1023;
 
   // Lecture de la vitesse
   v = vitesseGPS();
 
   // Ecriture sur la carte SD
-  // dataToSD();
-
-  Serial.print("Angle : ");
-  Serial.print(a); // Ecriture du fichier
-    Serial.print(", Speed GPS : ");
-  Serial.print(v.first);
-    Serial.print(", Speed calulated : ");
-  Serial.print(v.second);
-    Serial.print(", Power : ");
-  Serial.println(i);
-  Serial.println();
-  delay(500); // pour la faciliter de lecture  
+  dataToSD();
 }
