@@ -11,8 +11,10 @@ PSI (2024/2025)
 
 ## TODO
 <ol>
-  <li>Diagram SysML</li>
+  <li>Diagram SysML for python code</li>
   <li>Verify python code</li>
+  <li>Mean value of experiences</li>
+  <li>Incertitudes</li>
 </ol>
 
 ## Référence:
