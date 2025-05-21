@@ -1,5 +1,5 @@
 '''
-    Code TIPE : Traitement des données
+    Code TIPE : Traitement des données expérimentales
     - Récupère les données des log{i}.txt
       des résultats expérimentaux donnés par
       Arduino. Fichier de la forme:
@@ -20,7 +20,7 @@
 # Importation des modules
 import numpy as np
 import matplotlib.pyplot as plt
-from collections import defaultdict as dd
+from collections import defaultdict
 
 
 
@@ -104,14 +104,19 @@ def cherche_angle(d):
 
 
 
+
 ############## Boucle principale ##############
 
-# Creation d'un default dict
-# sert à fusionner des dictionnaires facilement
-angle = dd(list)
+
+
+# Creation d'un default dict: dictionnaire python plus puissant
+# Ici, il sert seulement à fusionner des dictionnaires facilement
+angle = defaultdict(list)
+
 # Incertitude de vitesse : ou avec Monte-Carlo et incertitudes positions
 # (max(ecart_global) - min(ecart_global) )/ sqrt(12)
 ecart_global = [] 
+
 # Iteration sur tout les fichiers logs
 for i in range(2):
     angle_i,ecart = traitement(i)
@@ -133,9 +138,9 @@ v = cherche_angle(angle)
 
 # Barre d'erreurs
 err = []
-# On met seulement quelques incertitudes
+# On affiche seulement quelques incertitudes
 for i in range(len(v)//100):
-    err += []
+    err += [ecart_global]
     err += [0 for i in range(len(v))]
 
 plt.plot(v[:][0],v[:][1], xerr = err, marker='x')
