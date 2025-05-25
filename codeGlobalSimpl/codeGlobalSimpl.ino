@@ -121,7 +121,7 @@ File dataToSD(){
       logFile.print(", ");
     logFile.print(v1);
       logFile.print(",");
-    logFile.println(p);
+    logFile.print(p);
     logFile.print(v.first);
       logFile.print(", ");
     logFile.print(v.second);
