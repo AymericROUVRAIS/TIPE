@@ -114,14 +114,19 @@ def cherche_angle(d):
 angle = defaultdict(list)
 
 # Incertitude de vitesse : ou avec Monte-Carlo et incertitudes positions
-# (max(ecart_global) - min(ecart_global) )/ sqrt(12)
+# Incertitude type A
 ecart_global = [] 
+
+
+# u(v) = sqrt(1/(N-1) SUM_i (v_i-v_moy)**2)
+
 
 # Iteration sur tout les fichiers logs
 for i in range(2):
     angle_i,ecart = traitement(i)
     
-    ecart_global += ecart
+    ecart_global.append(ecart)
+
     # On fusionne angle_i avec angle
     for key,value in d.items():
         angle[key].append(value)
@@ -140,10 +145,10 @@ v = cherche_angle(angle)
 err = []
 # On affiche seulement quelques incertitudes
 for i in range(len(v)//100):
-    err += [ecart_global]
+    err += [ecart_global / (len(v)**0.5)]
     err += [0 for i in range(len(v))]
 
-plt.plot(v[:][0],v[:][1], xerr = err, marker='x')
+plt.plot(v[:][0],v[:][1], xerr=err, marker='x')
 plt.title('Evolution de l\'angle optimal en fonction de la vitesse')
 plt.xlabel('Vitesse (m/s)')
 plt.ylabel('Angle (degré)')
