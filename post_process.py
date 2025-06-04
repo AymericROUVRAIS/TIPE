@@ -1,8 +1,8 @@
 '''
     Code TIPE : Traitement des données expérimentales
     - Récupère les données des log{i}.txt
-      des résultats expérimentaux donnés par
-      Arduino. Fichier de la forme:
+      des résultats expérimentaux donnés par la carte
+      Arduino. Fichier log de la forme:
           angle, vitesse, vitesse2, puissance
                  mesuré   calculé   moteur
           angle, ...
@@ -10,6 +10,9 @@
     - Créer une base de données sous la forme:
         {angle1 : [(vitesse1, vitesse2, puissance moteur)] }
     - Cherche le meilleur angle pour une vitesse donnée
+
+    satellite | lat,long | vitesse(m/s) | hdop | course | alt | date | time | angle / intensité
+
 
     - Trace l'evolution de l'angle idéal en fonction
       de la vitesse
@@ -122,23 +125,25 @@ ecart_global = []
 
 
 # Iteration sur tout les fichiers logs
-for i in range(2):
-    angle_i,ecart = traitement(i)
-    
-    ecart_global.append(ecart)
-
-    # On fusionne angle_i avec angle
-    for key,value in d.items():
-        angle[key].append(value)
-
-print(f'Ecart de vitesse : min {min(ecart)} km/h, max {max(ecart)} km/h')
+# for i in range(2):
+#     angle_i,ecart = traitement(i)
+#    
+#     ecart_global.append(ecart)
+#
+#     # On fusionne angle_i avec angle
+#     for key,value in d.items():
+#         angle[key].append(value)
+#
+# print(f'Ecart de vitesse : min {min(ecart)} km/h, max {max(ecart)} km/h')
 
 
 # On cherche une le meilleur pour une vitesse donnée
-v = cherche_angle(angle)
+# v = cherche_angle(angle)
 
 
-# Traçage du graph de l'angle en fonction de la vitesse
+# Traçage du graphe de l'angle en fonction de la vitesse
+
+
 
 
 # Barre d'erreurs
