@@ -1,3 +1,31 @@
+'''
+    Code TIPE : Traitement des données expérimentales
+    - Récupère les données de log.txt
+      les résultats expérimentaux donnés par la carte Arduino. 
+      Les fichiers log sont de la forme:
+          angle, vitesse, intensité
+                 mesuré   moteur
+          angle, ...
+          ...
+        {angle1 : [(vitesse1, vitesse2, puissance moteur)] }
+
+    satellite | lat,long | vitesse(m/s) | hdop | course | alt | date | time | angle / intensité
+
+
+    - Trace l'evolution de l'intensité en fonction
+      de la vitesse à un angle donné
+'''
+
+
+
+
+
+
+
+
+
+
+
 # Just for the cool factor...
 from colorama import Fore,Style
 
@@ -10,7 +38,7 @@ ascii_art = r'''
 #       \ \  \ \ \  \ \  \___|\ \  \_|\ \  #   [Resultats experimentaux]
 #        \ \__\ \ \__\ \__\    \ \_______\ #   [------------- NASA AD-1]
 #         \|__|  \|__|\|__|     \|_______| #   [------ Aymeric Rouvrais]
-############################################   ~ v2.2'''
+############################################   ~ v2.3'''
 
 # ANSI color codes
 RED = '\033[31m'
@@ -140,7 +168,7 @@ intensites_exp[2] = 33
 intensites_exp[5] = 45
 intensites_exp[0] = 30
 for i in range(len(intensites_exp)):
-    intensites_exp[i] -= 15
+    intensites_exp[i] -= 25
 
 
 
@@ -148,14 +176,53 @@ for i in range(len(intensites_exp)):
 # a = min(resultat[:][1])
 # b = max(resultat[:][1])
 # x = np.linspace(a,27,len(intensites_exp))
-x = vitesses
+
+# print(intensites_exp)
+# print(u_exp)
+
 
 # Conversion en matrice pour plt.errorbar()
-x = np.array(x)
-intensites_exp = np.array(intensites_exp)
-u_exp = np.array(u_exp)
+x = np.array(vitesses[4:])
+intensites_exp = np.array(intensites_exp[4:])
+u_exp = np.array(u_exp[4:])
 
-plt.errorbar(x,intensites_exp,yerr=u_exp,fmt='-x',ecolor='black',capsize=5)
+
+vit1 = [0, 1, 2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 15, 17, 18, 20, 22, 24, 25, 27]
+int1 = [3, 11.0, 14, 13.0, 18.0, 28, 32.0, 40, 42.0, 42.0, 42.0, 42.0, 42.0, 42.0, 42.0, 42.0, 42.0, 42.0, 42.0, 42.0]
+u1 = [1.0e-2,2.2730302828309763, 1.391829630116979e-16, 0.05, 3.7e-3, 1.2, 0.4, 0.7, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+print(len(vit1))
+print(len(int1))
+
+vit1= np.array(vit1[4:])
+int1= np.array(int1[4:])
+u1 = np.array(u1[4:])
+
+plt.errorbar(x,intensites_exp,yerr=u_exp,fmt='-x',ecolor='black',capsize=5, label='Angle de 0°')
+plt.errorbar(vit1,int1,yerr=u1,fmt='-x',ecolor='black',capsize=5, label='Angle de 45°')
+
+
 plt.xlabel('Vitesse (m/s)')
 plt.ylabel('Intensité (A)')
+plt.axis([4.,28. , 4.,45.]) 
+plt.legend()
+
+# Set major and minor ticks
+plt.minorticks_on()
+
+# Add grid for both major and minor ticks
+plt.grid(which='major', linestyle='-', linewidth=0.75)
+plt.grid(which='minor', linestyle=':', linewidth=0.5)
+
+# Optional: Customize tick spacing using MultipleLocator
+from matplotlib.ticker import MultipleLocator
+
+# For finer control, e.g., every 2 units on x and 5 units on y for major ticks
+plt.gca().xaxis.set_major_locator(MultipleLocator(5))
+plt.gca().yaxis.set_major_locator(MultipleLocator(5))
+# And smaller steps for minor ticks
+plt.gca().xaxis.set_minor_locator(MultipleLocator(1))
+plt.gca().yaxis.set_minor_locator(MultipleLocator(1))
+
+# plt.grid()
 plt.show()
