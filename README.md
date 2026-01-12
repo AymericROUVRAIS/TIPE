@@ -1,5 +1,7 @@
 ## Structure
-Les fichiers .ino utilisés pour programmer la carte Arduino (nano) sont dans des dossiers pour les intégrer correctment dans l'environnement de développement Arduino (Arduino IDE)
+Les fichiers .ino utilisés pour programmer la carte Arduino (nano) sont dans des dossiers pour les intégrer correctment dans l'environnement de développement Arduino (Arduino IDE).
+
+Le fichier .fzz correspond au diagramme de branchement du système de prise de données basé sur une carte Arduin. Il provient du logiciel Fritzing. On peut le retrouver dans la présentation du TIPE sous forme d'image, où il peut être regardé sans avoir besoin du logiciel.
 
 ## Contenu
 Il y a des versions avec et sans Serial Monitor pour réduire la charge calculatoire de la carte micro-contrôleur et augmenter la lisibilité du code qui devra être imprimer le jour de la soutenance.
