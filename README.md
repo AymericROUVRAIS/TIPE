@@ -9,4 +9,4 @@ Les code python .py correspondent à différement traitement des données expér
 - traitement_theorique.py permet de régler des problèmes de données mal écrite dans un fichier de données.
 Les fichiers post_process-2.py et graph_theorie.py sont ceux utilisés pour générer les graphes que l'on retrouve dans la présentation du TIPE.
 
-Les fichiers .txt et .csv sont les mêmes, seuls l'extension du fichier diffère.
+Les fichiers .txt et .csv sont les mêmes, seul l'extension du fichier diffère.
