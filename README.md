@@ -4,11 +4,10 @@ PCSI-PSI (2024/2025)
 
 ## Branches
 
-<ul>
-  <li><a href="https://github.com/AymericROUVRAIS/TIPE/tree/Arduino">Arduino</a> : pour avoir tout le code sur Arduino et la documentation</li>
-  <li><a href="https://github.com/AymericROUVRAIS/TIPE/tree/CFD">CFD</a> : pour avoir les scripts de simulation CFD</li>
-  <li><a href="https://github.com/AymericROUVRAIS/TIPE/tree/PostProcess">PostProcess</a> :  pour avoir les scripts de traitement des données venant des experiences avec Arduino</li>
-</ul>
+  - <a href="https://github.com/AymericROUVRAIS/TIPE/tree/Arduino">Arduino</a> : pour avoir tout le code sur Arduino et la documentation</li>
+  - <a href="https://github.com/AymericROUVRAIS/TIPE/tree/CFD">CFD</a> : pour avoir les scripts de simulation CFD</li>
+  - <a href="https://github.com/AymericROUVRAIS/TIPE/tree/PostProcess">PostProcess</a> :  pour avoir les scripts de traitement des données venant des experiences avec Arduino
+  - <a href="https://github.com/AymericROUVRAIS/TIPE/tree/Realisation">Realisation</a> : pour avoir accès aux fichiers permmettant de réaliser l'avion
 
 ## Présentation
 
