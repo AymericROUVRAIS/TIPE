@@ -21,3 +21,5 @@ Le fichier presentation.pdf correspond au support de présentation que j'ai util
 <a href="https://www.simscale.com">SimScale</a> pour les simulations de fluide
 
 Thinking obliquely de Robert T. Jones et al., l'inspiration de ce projet
+
+<a href="https://forum.flitetest.com/index.php?threads/nasa-ad-1-oblique-wing.66126/">NASA AD-1 Plan Release</a>, les fichiers utilisés lors de la première réalisation de l'avion
