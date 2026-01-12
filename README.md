@@ -1,24 +1,6 @@
-# Projet de TIPE: AD-1 OWRA
+## Contenu
 
-PCSI-PSI (2024/2025)
+Les documents AD-1 Plan guide.pdf et Cote.pdf sont des guides pour réaliser l'avion. Ils ont était réaliser dans le but de monter l'avion en utilisant les fichiers de <a href="https://forum.flitetest.com/index.php?threads/nasa-ad-1-oblique-wing.66126"/>PieLiker69</a>.
+AD-1 Plan guide.pdf donne le guide des étapes à suivre et Cote.pdf donne des côtes de références afin de plier aux bons endroits le matériau qui a été decoupé aux préalable à la decoupe laser.
 
-## Branches
-
-<ul>
-  <li><a href="https://github.com/AymericROUVRAIS/TIPE/tree/Arduino">Arduino</a> : pour avoir tout le code sur Arduino et la documentation</li>
-  <li><a href="https://github.com/AymericROUVRAIS/TIPE/tree/CFD">CFD</a> : pour avoir les scripts de simulation CFD</li>
-  <li><a href="https://github.com/AymericROUVRAIS/TIPE/tree/PostProcess">PostProcess</a> :  pour avoir les scripts de traitement des données venant des experiences avec Arduino</li>
-</ul>
-
-## Présentation
-
-Le fichier presentation.pdf correspond au support de présentation que j'ai utilisé pour mon TIPE. Il permet de voir rapidement ce qui a été fait. Le detail du travail réalisé se trouve dans les différentes branches.
-
-
-## Référence
-
-<a href="https://github.com/ProjectPhysX/FluidX3D">FluidX3D</a> de Dr. Moritz Lehmann
-
-<a href="https://www.simscale.com">SimScale</a> pour les simulations de fluide
-
-Thinking obliquely de Robert T. Jones et al., l'inspiration de ce projet
+Il y a aussi les fichiers de l'avion que j'ai réalisé en bois, qui est plus rigide. Cette fois il n'y pas de guide, les fichiers de conception suffisent pour avoir l'ordre des pièces.
