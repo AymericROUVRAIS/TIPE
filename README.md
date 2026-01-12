@@ -20,3 +20,5 @@ Le fichier presentation.pdf correspond au support de présentation que j'ai util
 <a href="https://github.com/ProjectPhysX/FluidX3D">FluidX3D</a> de Dr. Moritz Lehmann
 
 <a href="https://www.simscale.com">SimScale</a> pour les simulations de fluide
+
+Thinking obliquely de Robert T. Jones et al., l'inspiration de ce projet
